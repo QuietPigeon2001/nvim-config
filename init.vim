@@ -1,6 +1,9 @@
 "Show line number by default
 set number
 
+"Turn on spell checker by default
+" set spell
+
 " Remap the leader key
 let g:mapleader = ","
 
@@ -11,6 +14,13 @@ set ts=4 sw=4
 highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
 
 call plug#begin('~/.config/nvim/plugged')
+" The default plugin directory will be as follows:
+"   - Vim (Linux/macOS): '~/.vim/plugged'
+"   - Vim (Windows): '~/vimfiles/plugged'
+"   - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
+" You can specify a custom plugin directory by passing it as the argument
+"   - e.g. `call plug#begin('~/.vim/plugged')`
+"   - Avoid using standard Vim directory names like 'plugin'
 
 "mardown preview
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
@@ -49,7 +59,7 @@ let g:airline#extensions#tabline#formatter = 'default'
 let g:airline_theme='base16'
 
 "Autopairing for parenthesis
-Plug 'jiangmia,o/auto-pairs'
+Plug 'jiangmiao/auto-pairs'
 
 "Leetcode in Vim
 Plug 'ianding1/leetcode.vim'
@@ -75,6 +85,11 @@ Plug 'hrsh7th/vim-vsnip'
 Plug 'mhinz/vim-startify'
 
 Plug 'nvim-neorg/neorg' | Plug 'nvim-lua/plenary.nvim'
+
+" post install (yarn install | npm install) then load plugin only for editing supported files
+Plug 'prettier/vim-prettier', {
+  \ 'do': 'yarn install --frozen-lockfile --production',
+  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'svelte', 'yaml', 'html'] }
 
 "Initialize plugin system"
 call plug#end()
@@ -107,7 +122,8 @@ require('neorg').setup {
         ["core.norg.dirman"] = { -- Manages Neorg workspaces
             config = {
                 workspaces = {
-					work = "~/code/norg",
+					school = "~/code/norg/school",
+					work = "~/code/norg/work"
                 },
             },
         },
@@ -216,7 +232,6 @@ lua << EOF
     }
   })
 
-  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline(':', {
     mapping = cmp.mapping.preset.cmdline(),
     sources = cmp.config.sources({
@@ -226,9 +241,7 @@ lua << EOF
     })
   })
 
-  -- Set up lspconfig.
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
-  -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
   require('lspconfig')['pyright'].setup {
     capabilities = capabilities
   }
