@@ -3,9 +3,21 @@ set number
 
 "Turn on spell checker by default
 " set spell
+"
+syntax enable
+filetype plugin indent on
 
 " Remap the leader key
 let g:mapleader = ","
+let g:rustfmt_autosave = 1
+let g:AutoPairsShortcutToggle = "@"
+
+nnoremap <C-n> :NERDTree<CR>
+nnoremap <C-t> :NERDTreeToggle<CR>
+nnoremap <C-f> :NERDTreeFind<CR>
+nnoremap <C-l> :tabnext<CR>
+nnoremap <C-h> :tabprevious<CR>
+
 
 "Preset tab and space spaces
 set ts=4 sw=4
@@ -14,13 +26,6 @@ set ts=4 sw=4
 highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
 
 call plug#begin('~/.config/nvim/plugged')
-" The default plugin directory will be as follows:
-"   - Vim (Linux/macOS): '~/.vim/plugged'
-"   - Vim (Windows): '~/vimfiles/plugged'
-"   - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
-" You can specify a custom plugin directory by passing it as the argument
-"   - e.g. `call plug#begin('~/.vim/plugged')`
-"   - Avoid using standard Vim directory names like 'plugin'
 
 "mardown preview
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
@@ -84,7 +89,8 @@ Plug 'hrsh7th/vim-vsnip'
 
 Plug 'mhinz/vim-startify'
 
-Plug 'nvim-neorg/neorg' | Plug 'nvim-lua/plenary.nvim'
+" For rust.vim
+Plug 'rust-lang/rust.vim'
 
 " post install (yarn install | npm install) then load plugin only for editing supported files
 Plug 'prettier/vim-prettier', {
@@ -104,84 +110,21 @@ require 'nvim-treesitter.configs'.setup {
 		enable = true,
 		}
 	}
-
-require('neorg').setup {
-    load = {
-        ["core.defaults"] = {}, -- Loads default behaviour
-		["core.integrations.treesitter"] = {},
-		["core.integrations.nvim-cmp"] = {},
-        ["core.norg.concealer"] = {}, -- Adds pretty icons to your documents
-		["core.highlights"] = {},
-		["core.norg.completion"] = {
-			config = {
-			engine = "nvim-cmp",
-			name = "[Neorg]",
-				}
-			}, -- A wrapper to interface with several different completion engines
-		["core.norg.qol.toc"] = {}, -- Generates a Table of Contents from the Neorg file
-        ["core.norg.dirman"] = { -- Manages Neorg workspaces
-            config = {
-                workspaces = {
-					school = "~/code/norg/school",
-					work = "~/code/norg/work"
-                },
-            },
-        },
-    },
-}
 EOF
 
-
 lua << EOF
-  -- Setup language servers.
+
+-- Setup language servers.
 local lspconfig = require('lspconfig')
 lspconfig.pyright.setup {}
 lspconfig.tsserver.setup {}
+lspconfig.sourcekit.setup{}
 lspconfig.rust_analyzer.setup {
   -- Server-specific settings. See `:help lspconfig-setup`
   settings = {
     ['rust-analyzer'] = {},
   },
 }
-
--- Global mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
-vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
-vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
-
--- Use LspAttach autocommand to only map the following keys
--- after the language server attaches to the current buffer
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-  callback = function(ev)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
-
-    -- Buffer local mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local opts = { buffer = ev.buf }
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-    vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
-    vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
-    vim.keymap.set('n', '<space>wl', function()
-      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    end, opts)
-    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
-    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
-    vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-    vim.keymap.set('n', '<space>f', function()
-      vim.lsp.buf.format { async = true }
-    end, opts)
-  end,
-})
-
 EOF
 
 lua << EOF
